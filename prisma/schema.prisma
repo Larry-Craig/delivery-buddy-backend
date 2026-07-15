@@ -1,0 +1,60 @@
+generator client {
+  provider     = "prisma-client-js"
+  moduleFormat = "cjs"
+}
+datasource db {
+  provider = "sqlite"
+}
+model User {
+  id             String        @id @default(uuid())
+  name           String
+  workId         String        @unique 
+  level          Int           @default(1)
+  currentRate    String        @default("15%") 
+  transportation String        @default("BICYCLE") 
+  walletBalance  Float         @default(0.0)
+  tipsBalance    Float         @default(0.0)
+  shifts         Shift[]
+  transactions   Transaction[]
+}
+
+model Shift {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  startTime DateTime  @default(now())
+  endTime   DateTime?
+  earnings  Float     @default(0.0)
+  tips      Float     @default(0.0)
+  status    String    @default("ACTIVE") 
+}
+
+model Order {
+  id                 String   @id @default(uuid()) 
+  status             String   @default("PENDING") 
+  pickupName         String   
+  pickupAddress      String
+  destinationName    String   
+  destinationAddress String
+  itemsJson          String   
+  total              Float
+  tip                Float
+  paymentMethod      String   @default("Credit Card")
+}
+
+model Transaction {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  type      String   
+  amount    Float
+  createdAt DateTime @default(now())
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  orderId   String
+  sender    String   
+  message   String
+  createdAt DateTime @default(now())
+}
