@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: delivery-buddy-backend
+    env: node
+    buildCommand: "npm install && npm run build"
+    startCommand: "npm run start:prod"
+    envVars:
+      - key: DATABASE_URL
+        value: file:/data/delivery_buddy.db
+      - key: NODE_ENV
+        value: production
+    disk:
+      name: sqlite-data
+      mountPath: /data
+      sizeGB: 1
