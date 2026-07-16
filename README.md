@@ -128,12 +128,31 @@ npm run start:dev
 
 ---
 
+# Environment Variables
+
+Create a `.env` file in the root directory with the following configuration:
+
+```env
+# .env
+DATABASE_URL="file:./dev.db"
+PORT=3000
+NODE_ENV=development
+```
+
+---
+
 # Running Tests
 
 Run all End-to-End tests
 
 ```bash
 npm run test:e2e
+```
+
+Run specific test suite
+
+```bash
+npm run test:e2e -- --testPathPattern=drivers
 ```
 
 Current Status
@@ -149,95 +168,323 @@ Current Status
 
 ## Drivers
 
-POST
+### Register a new driver
 
 ```
-/v1/drivers/register
+POST /v1/drivers/register
 ```
 
-GET
+**Request Body:**
+```json
+{
+  "name": "John Doe",
+  "workId": "DRV-123"
+}
+```
+
+**Response:**
+```json
+{
+  "id": "1",
+  "name": "John Doe",
+  "workId": "DRV-123",
+  "createdAt": "2026-07-16T10:00:00.000Z"
+}
+```
+
+---
+
+### Login driver
 
 ```
-/v1/drivers/login
+GET /v1/drivers/login?workId=DRV-123
 ```
 
-GET
+**Response:**
+```json
+{
+  "id": "1",
+  "name": "John Doe",
+  "workId": "DRV-123"
+}
+```
+
+---
+
+### Get driver profile
 
 ```
-/v1/drivers/:id
+GET /v1/drivers/:id
+```
+
+**Response:**
+```json
+{
+  "id": "1",
+  "name": "John Doe",
+  "workId": "DRV-123",
+  "wallet": {
+    "balance": 150.50
+  }
+}
 ```
 
 ---
 
 ## Orders
 
-POST
+### Create delivery order
 
 ```
-/v1/orders
+POST /v1/orders
 ```
 
-PATCH
+**Request Body:**
+```json
+{
+  "pickupAddress": "123 Main St",
+  "deliveryAddress": "456 Oak Ave",
+  "driverId": "1"
+}
+```
+
+**Response:**
+```json
+{
+  "id": "1",
+  "pickupAddress": "123 Main St",
+  "deliveryAddress": "456 Oak Ave",
+  "status": "PENDING",
+  "driverId": "1",
+  "createdAt": "2026-07-16T10:00:00.000Z"
+}
+```
+
+---
+
+### Update order status
 
 ```
-/v1/orders/:id/status
+PATCH /v1/orders/:id/status
 ```
 
-GET
+**Request Body:**
+```json
+{
+  "status": "DELIVERED"
+}
+```
+
+**Response:**
+```json
+{
+  "id": "1",
+  "status": "DELIVERED",
+  "updatedAt": "2026-07-16T10:30:00.000Z"
+}
+```
+
+---
+
+### Get all orders
 
 ```
-/v1/orders
+GET /v1/orders
+```
+
+**Query Parameters:**
+- `driverId` (optional) - Filter by driver
+- `status` (optional) - Filter by status
+
+**Response:**
+```json
+[
+  {
+    "id": "1",
+    "pickupAddress": "123 Main St",
+    "deliveryAddress": "456 Oak Ave",
+    "status": "DELIVERED",
+    "driverId": "1"
+  }
+]
 ```
 
 ---
 
 ## Shifts
 
-POST
+### Start shift
 
 ```
-/v1/shifts/start
+POST /v1/shifts/start
 ```
 
-POST
-
-```
-/v1/shifts/stop
-```
-
-GET
-
-```
-/v1/shifts/active
+**Request Body:**
+```json
+{
+  "driverId": "1"
+}
 ```
 
-GET
+**Response:**
+```json
+{
+  "id": "1",
+  "driverId": "1",
+  "startTime": "2026-07-16T10:00:00.000Z",
+  "endTime": null,
+  "isActive": true
+}
+```
+
+---
+
+### Stop shift
 
 ```
-/v1/shifts/last
+POST /v1/shifts/stop
+```
+
+**Request Body:**
+```json
+{
+  "driverId": "1"
+}
+```
+
+**Response:**
+```json
+{
+  "id": "1",
+  "driverId": "1",
+  "startTime": "2026-07-16T10:00:00.000Z",
+  "endTime": "2026-07-16T18:00:00.000Z",
+  "isActive": false
+}
+```
+
+---
+
+### Get active shift
+
+```
+GET /v1/shifts/active?driverId=1
+```
+
+**Response:**
+```json
+{
+  "id": "1",
+  "driverId": "1",
+  "startTime": "2026-07-16T10:00:00.000Z",
+  "endTime": null,
+  "isActive": true
+}
+```
+
+---
+
+### Get last shift
+
+```
+GET /v1/shifts/last?driverId=1
+```
+
+**Response:**
+```json
+{
+  "id": "1",
+  "driverId": "1",
+  "startTime": "2026-07-16T10:00:00.000Z",
+  "endTime": "2026-07-16T18:00:00.000Z",
+  "isActive": false
+}
 ```
 
 ---
 
 ## Wallet
 
-POST
+### Withdraw funds
 
 ```
-/v1/wallet/withdraw
+POST /v1/wallet/withdraw
 ```
 
-GET
+**Request Body:**
+```json
+{
+  "driverId": "1",
+  "amount": 50.00,
+  "currency": "USD"
+}
+```
+
+**Response:**
+```json
+{
+  "id": "1",
+  "driverId": "1",
+  "amount": 50.00,
+  "currency": "USD",
+  "status": "COMPLETED",
+  "transactionDate": "2026-07-16T10:00:00.000Z"
+}
+```
+
+---
+
+### Get transaction history
 
 ```
-/v1/wallet/transactions
+GET /v1/wallet/transactions?driverId=1
 ```
 
-GET
+**Response:**
+```json
+[
+  {
+    "id": "1",
+    "driverId": "1",
+    "amount": 50.00,
+    "currency": "USD",
+    "status": "COMPLETED",
+    "transactionDate": "2026-07-16T10:00:00.000Z"
+  }
+]
+```
+
+---
+
+### Get exchange rates (cached)
 
 ```
-/v1/wallet/rates
+GET /v1/wallet/rates
 ```
+
+**Response:**
+```json
+{
+  "USD": 1.00,
+  "EUR": 0.92,
+  "GBP": 0.78,
+  "NGN": 1550.00,
+  "cachedAt": "2026-07-16T10:00:00.000Z"
+}
+```
+
+---
+
+# Authentication
+
+**Current Implementation:** Work ID-based authentication
+
+**Request Headers:**
+```
+x-work-id: DRV-123
+```
+
+> **Note:** JWT authentication is planned for future releases.
 
 ---
 
@@ -259,6 +506,17 @@ All tests are currently passing.
 
 ---
 
+# Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| Prisma Client not found | Run `npx prisma generate` |
+| Migration fails | Delete `prisma/dev.db` and re-migrate |
+| Port already in use | Change `PORT` in `.env` file |
+| Database connection error | Ensure `DATABASE_URL` is set correctly |
+
+---
+
 # Future Improvements
 
 - JWT Authentication
@@ -272,12 +530,47 @@ All tests are currently passing.
 
 ---
 
-# Author
+# License
 
-Larry Craig
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
 
-GitHub
-
-https://github.com/Larry-Craig
+This project is licensed under the MIT License.
 
 ---
+
+# Author
+
+**Larry Craig**
+
+- GitHub: [https://github.com/Larry-Craig](https://github.com/Larry-Craig)
+
+---
+
+# Support
+
+For support, email chewachongcraig@gmail.com or open an issue on GitHub.
+
+---
+
+# Quick Start
+
+```bash
+# Clone the repository
+git clone https://github.com/Larry-Craig/delivery-buddy-backend.git
+
+# Install dependencies
+cd delivery-buddy-backend && npm install
+
+# Set up database
+npx prisma generate && npx prisma migrate dev
+
+# Start the server
+npm run start:dev
+
+# Run tests
+npm run test:e2e
+```
+
+---
+
+**Built  using NestJS**
